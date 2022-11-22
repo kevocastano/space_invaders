@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from pygame import mixer
 
 # Inicializar Pygame
 pygame.init()
@@ -13,6 +14,11 @@ pygame.display.set_caption("Invasión Espacial")
 icono = pygame.image.load("ovni.png")
 pygame.display.set_icon(icono)
 fondo = pygame.image.load("fondo.jpg")
+
+# Agregar música
+mixer.music.load("MusicaFondo.mp3")
+mixer.music.set_volume(0.3)
+mixer.music.play(-1)
 
 # Variables del jugador
 img_jugador = pygame.image.load("cohete.png")
@@ -49,6 +55,13 @@ fuente = pygame.font.Font('freesansbold.ttf', 32)
 texto_x = 10
 texto_y = 10
 
+# Texto final de juego
+fuente_final = pygame.font.Font('freesansbold.ttf', 40)
+
+def texto_final():
+    mi_fuente_final = fuente_final.render("GAME OVER", True, (255, 255, 255))
+    pantalla.blit(mi_fuente_final, (60, 200))
+    
 # Función mostrar puntaje
 def mostrar_puntaje(x, y):
     texto = fuente.render(f'Puntaje: {puntaje}', True, (255, 255, 255))
@@ -98,6 +111,8 @@ while se_ejecuta:
             if evento.key == pygame.K_RIGHT:
                 jugador_x_cambio = 0.3
             if evento.key == pygame.K_SPACE:
+                sonido_bala = mixer.Sound("disparo.mp3")
+                sonido_bala.play()
                 if bala_visible == False:
                     bala_x = jugador_x
                     disparar_bala(bala_x, bala_y)
@@ -118,6 +133,14 @@ while se_ejecuta:
 
     # Modificar ubicación del enemigo
     for e in range(cantidad_enemigos):
+
+        # Fin del juego
+        if enemigo_y[e] > 500:
+            for k in range(cantidad_enemigos):
+                enemigo_y[k] = 1000
+            texto_final()
+            break
+
         enemigo_x[e] += enemigo_x_cambio[e]
 
     # Mantener dentro de bordes al enemigo
@@ -131,6 +154,8 @@ while se_ejecuta:
          # Colisión
         colision = hay_colision(enemigo_x[e], enemigo_y[e], bala_x, bala_y)
         if colision == True:
+            sonido_colision = mixer.Sound("Golpe.mp3")
+            sonido_colision.play()
             bala_y = 500
             bala_visible = False
             puntaje += 1
